@@ -1,0 +1,26 @@
+services:
+  cobalt:
+    image: ghcr.io/imputnet/cobalt:11
+    init: true
+    read_only: true
+    restart: unless-stopped
+    container_name: datzon-cobalt
+    ports:
+      - "9000:9000/tcp"
+    environment:
+      # Ganti dengan URL publik backend ini, wajib diakhiri slash.
+      API_URL: "https://api-downloader.domainmu.com/"
+      FORCE_LOCAL_PROCESSING: "never"
+      CORS_WILDCARD: "0"
+      CORS_URL: "https://domain-frontend-kamu.vercel.app"
+      RATELIMIT_WINDOW: "60"
+      RATELIMIT_MAX: "20"
+    labels:
+      - com.centurylinklabs.watchtower.scope=datzon-cobalt
+
+  watchtower:
+    image: ghcr.io/containrrr/watchtower
+    restart: unless-stopped
+    command: --cleanup --scope datzon-cobalt --interval 900 --include-restarting
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
